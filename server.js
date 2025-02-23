@@ -1,5 +1,3 @@
-const fs = require("fs");
-//const https = require("https");
 const express = require("express");
 const { Sequelize, DataTypes } = require("sequelize");
 const cors = require("cors");
@@ -10,92 +8,163 @@ const sequelize = new Sequelize("postgres", "postgres", "postgres", {
   dialect: "postgres",
 });
 
+// Define the User model
 const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    unique: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  discord: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  discord: DataTypes.STRING,
+  lodestoneid: DataTypes.STRING,
+  lodestoneimage: DataTypes.STRING,
+  raidmember: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
-  lodestoneid: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  ninemember: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
-  lodestoneimage: { type: DataTypes.STRING, allowNull: true },
-  raidmember: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-  ninemember: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-  admin: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 });
 
-// Sync DB
-sequelize.sync().then(() => console.log("Database synced"));
+// Define the Raidfloor model
+const Raidfloor = sequelize.define("Raidfloor", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: DataTypes.STRING,
+  order: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+});
 
+// Define the Raiditem model
+const Raiditem = sequelize.define("Raiditem", {
+  raiditemid: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  isweapon: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  haslist: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  raidimage: DataTypes.STRING,
+  order: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+});
+
+// Sync all models
+sequelize
+  .sync()
+  .then(() => console.log("Database synced successfully."))
+  .catch((err) => console.error("Failed to sync database:", err));
+
+// Express App Setup
 const app = express();
-//const port = 3443
-//const privateKey = fs.readFileSync("/app/certs/acac-api.key", "utf8");
-//const certificate = fs.readFileSync("/app/certs/acac-api.crt", "utf8");
-//const credentials = { key: privateKey, cert: certificate };
-
 app.use(cors());
 app.use(express.json());
+const port = 3001;
 
-// CRUD Routes
-app.get("/users", async (req, res) => {
-  const users = await User.findAll();
-  res.json(users);
-});
+// Utility function for CRUD operations
+const handleCRUD = (Model, idField = "id") => {
+  // Create
+  app.post(`/${Model.name.toLowerCase()}s`, async (req, res) => {
+    try {
+      const item = await Model.create(req.body);
+      res.status(201).json(item);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  });
 
-app.post("/users", async (req, res) => {
-  const { name, discord, lodestoneid, lodestoneimage, raidmember, ninemember, admin } = req.body;
-  try {
-    const user = await User.create({ name, discord, lodestoneid, lodestoneimage, raidmember, ninemember, admin });
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+  // Read all
+  app.get(`/${Model.name.toLowerCase()}s`, async (req, res) => {
+    try {
+      const items = await Model.findAll();
+      res.status(200).json(items);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-app.get("/users/:id", async (req, res) => {
-  const user = await User.findByPk(req.params.id);
-  if (user) res.json(user);
-  else res.status(404).json({ error: "User not found" });
-});
+  // Read by ID
+  app.get(`/${Model.name.toLowerCase()}s/:id`, async (req, res) => {
+    try {
+      const item = await Model.findByPk(req.params.id);
+      if (item) res.status(200).json(item);
+      else res.status(404).json({ error: `${Model.name} not found` });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-app.put("/users/:id", async (req, res) => {
-  const { name, discord, lodestoneid, lodestoneimage, raidmember, ninemember, admin } = req.body;
-  const user = await User.findByPk(req.params.id);
-  if (user) {
-    user.name = name;
-    user.discord = discord;
-    user.lodestoneid = lodestoneid;
-    user.lodestoneimage = lodestoneimage;
-    user.raidmember = raidmember;
-    user.ninemember = ninemember;
-    user.admin = admin;
-    await user.save();
-    res.json(user);
-  } else {
-    res.status(404).json({ error: "User not found" });
-  }
-});
+  // Update by ID
+  app.put(`/${Model.name.toLowerCase()}s/:id`, async (req, res) => {
+    try {
+      const item = await Model.findByPk(req.params.id);
+      if (item) {
+        await item.update(req.body);
+        res.status(200).json(item);
+      } else {
+        res.status(404).json({ error: `${Model.name} not found` });
+      }
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  });
 
-app.delete("/users/:id", async (req, res) => {
-  const user = await User.findByPk(req.params.id);
-  if (user) {
-    await user.destroy();
-    res.json({ message: "User deleted" });
-  } else {
-    res.status(404).json({ error: "User not found" });
-  }
-});
+  // Delete by ID
+  app.delete(`/${Model.name.toLowerCase()}s/:id`, async (req, res) => {
+    try {
+      const item = await Model.findByPk(req.params.id);
+      if (item) {
+        await item.destroy();
+        res.status(204).send();
+      } else {
+        res.status(404).json({ error: `${Model.name} not found` });
+      }
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+};
+
+// Initialize CRUD Routes for all models
+handleCRUD(User);
+handleCRUD(Raidfloor);
+handleCRUD(Raiditem, "raiditemid");
 
 // Start Server
- app.listen(3001, () => {
-   console.log("Server running on port 3001");
- }); 
-
-// const httpsServer = https.createServer(credentials, app).listen(port, () => {
-//    console.log(`Server running on port ${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
