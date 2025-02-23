@@ -56,7 +56,7 @@ const Raidfloor = sequelize.define("Raidfloor", {
 
 // Define the Raiditem model
 const Raiditem = sequelize.define("Raiditem", {
-  raiditemid: {
+  id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
@@ -83,9 +83,50 @@ const Raiditem = sequelize.define("Raiditem", {
   },
 });
 
+// Define the Alternate model
+const Alternate = sequelize.define("Alternate", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  first_choice: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  second_choice: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
+
+// Define the Itemdrops model with associations
+const Itemdrop = sequelize.define("Itemdrop", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+});
+
+// Define Associations
+User.hasMany(Itemdrop, { foreignKey: "userid" });
+Itemdrop.belongsTo(User, { foreignKey: "userid" });
+
+Raiditem.hasMany(Itemdrop, { foreignKey: "itemid" });
+Itemdrop.belongsTo(Raiditem, { foreignKey: "itemid" });
+
+Raidfloor.hasMany(Itemdrop, { foreignKey: "floorid" });
+Itemdrop.belongsTo(Raidfloor, { foreignKey: "floorid" });
+
+User.hasMany(Alternate, { foreignKey: "userid" });
+Alternate.belongsTo(User, { foreignKey: "userid" });
+
+
+
 // Sync all models
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => console.log("Database synced successfully."))
   .catch((err) => console.error("Failed to sync database:", err));
 
@@ -162,7 +203,9 @@ const handleCRUD = (Model, idField = "id") => {
 // Initialize CRUD Routes for all models
 handleCRUD(User);
 handleCRUD(Raidfloor);
-handleCRUD(Raiditem, "raiditemid");
+handleCRUD(Raiditem);
+handleCRUD(Itemdrop);
+handleCRUD(Alternate);
 
 // Start Server
 app.listen(port, () => {
