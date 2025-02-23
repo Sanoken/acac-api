@@ -47,6 +47,7 @@ const Raidfloor = sequelize.define("Raidfloor", {
     allowNull: false,
   },
   description: DataTypes.STRING,
+  floorimage: DataTypes.STRING,
   order: {
     type: DataTypes.INTEGER,
     allowNull: false,
