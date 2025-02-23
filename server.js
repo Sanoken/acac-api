@@ -83,6 +83,23 @@ const Raiditem = sequelize.define("Raiditem", {
   },
 });
 
+// Define the Alternate model
+const Alternate = sequelize.define("Alternate", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  first_choice: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  second_choice: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
+
 // Define the Itemdrops model with associations
 const Itemdrop = sequelize.define("Itemdrop", {
   id: {
@@ -101,6 +118,11 @@ Itemdrop.belongsTo(Raiditem, { foreignKey: "itemid" });
 
 Raidfloor.hasMany(Itemdrop, { foreignKey: "floorid" });
 Itemdrop.belongsTo(Raidfloor, { foreignKey: "floorid" });
+
+User.hasMany(Alternate, { foreignKey: "userid" });
+Alternate.belongsTo(User, { foreignKey: "userid" });
+
+
 
 // Sync all models
 sequelize
@@ -183,6 +205,7 @@ handleCRUD(User);
 handleCRUD(Raidfloor);
 handleCRUD(Raiditem);
 handleCRUD(Itemdrop);
+handleCRUD(Alternate);
 
 // Start Server
 app.listen(port, () => {
