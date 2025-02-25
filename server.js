@@ -129,14 +129,6 @@ const Waitinglist = sequelize.define("Waitinglist", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  raiditemid: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  userid: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
 });
 
 // Define Associations
@@ -270,6 +262,8 @@ app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
 app.get("/waitinglists", async (req, res) => {
   try {
     const waitinglist = await Waitinglist.findAll({
+      where: { raiditemid: req.params.raiditemid },
+      attributes: { exclude: ["userid", "raiditemid"] }, // Exclude here
       include: [
         {
           model: User,
