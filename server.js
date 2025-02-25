@@ -82,6 +82,10 @@ const Raiditem = sequelize.define("Raiditem", {
     allowNull: false,
     defaultValue: 0,
   },
+  floorid: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
 });
 
 // Define the Alternate model
@@ -107,6 +111,14 @@ const Itemdrop = sequelize.define("Itemdrop", {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
+  },
+  itemid: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  userid: {
+    type: DataTypes.UUID,
+    allowNull: false,
   },
 });
 
