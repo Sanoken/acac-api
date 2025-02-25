@@ -110,6 +110,23 @@ const Itemdrop = sequelize.define("Itemdrop", {
   },
 });
 
+// Define the Waitinglist model
+const Waitinglist = sequelize.define("Waitinglist", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  raiditemid: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  userid: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+});
+
 // Define Associations
 User.hasMany(Itemdrop, { foreignKey: "userid" });
 Itemdrop.belongsTo(User, { foreignKey: "userid" });
@@ -123,7 +140,11 @@ Itemdrop.belongsTo(Raidfloor, { foreignKey: "floorid" });
 User.hasMany(Alternate, { foreignKey: "userid" });
 Alternate.belongsTo(User, { foreignKey: "userid" });
 
+User.hasMany(Waitinglist, { foreignKey: "userid" });
+Waitinglist.belongsTo(User, { foreignKey: "userid" });
 
+Raiditem.hasMany(Waitinglist, { foreignKey: "raiditemid" });
+Waitinglist.belongsTo(Raiditem, { foreignKey: "raiditemid" });
 
 // Sync all models
 sequelize
@@ -201,14 +222,55 @@ const handleCRUD = (Model, idField = "id") => {
   });
 };
 
+// Waitinglist Endpoints
+app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
+  try {
+    const waitinglist = await Waitinglist.findAll({
+      where: { raiditemid: req.params.raiditemid },
+      include: [{ model: User }, { model: Raiditem }],
+    });
+    res.status(200).json(waitinglist);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/waitinglists", async (req, res) => {
+  try {
+    const { raiditemid, userid } = req.body;
+    const newEntry = await Waitinglist.create({ raiditemid, userid });
+    res.status(201).json(newEntry);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/waitinglists/:raiditemid/:userid", async (req, res) => {
+  try {
+    const { raiditemid, userid } = req.params;
+    const waitinglistEntry = await Waitinglist.findOne({
+      where: { raiditemid, userid },
+    });
+
+    if (waitinglistEntry) {
+      await waitinglistEntry.destroy();
+      res.status(204).send();
+    } else {
+      res.status(404).json({ error: "Waitinglist entry not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Initialize CRUD Routes for all models
 handleCRUD(User);
 handleCRUD(Raidfloor);
 handleCRUD(Raiditem);
 handleCRUD(Itemdrop);
 handleCRUD(Alternate);
+handleCRUD(Waitinglist);
 
-// Start Server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
