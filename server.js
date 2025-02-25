@@ -227,7 +227,27 @@ app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
   try {
     const waitinglist = await Waitinglist.findAll({
       where: { raiditemid: req.params.raiditemid },
-      include: [{ model: User }, { model: Raiditem }],
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: Raiditem,
+          include: [
+            {
+              model: Itemdrop,
+              where: { itemid: req.params.raiditemid },
+              include: [
+                {
+                  model: Raidfloor,
+                  attributes: ["id", "name", "order"], // Adjust attributes as needed
+                },
+              ],
+              required: false, // Include even if no itemdrops exist
+            },
+          ],
+        },
+      ],
     });
     res.status(200).json(waitinglist);
   } catch (err) {
@@ -235,11 +255,31 @@ app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
   }
 });
 
-app.post("/waitinglists", async (req, res) => {
+app.get("/waitinglists", async (req, res) => {
   try {
-    const { raiditemid, userid } = req.body;
-    const newEntry = await Waitinglist.create({ raiditemid, userid });
-    res.status(201).json(newEntry);
+    const waitinglist = await Waitinglist.findAll({
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: Raiditem,
+          include: [
+            {
+              model: Itemdrop,
+              include: [
+                {
+                  model: Raidfloor,
+                  attributes: ["id", "name", "order"], // Include relevant fields
+                },
+              ],
+              required: false, // Include even if no itemdrops exist
+            },
+          ],
+        },
+      ],
+    });
+    res.status(200).json(waitinglist);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
