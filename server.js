@@ -275,6 +275,27 @@ app.delete("/waitinglists/:raiditemid/:userid", async (req, res) => {
   }
 });
 
+// Update Read all Itemdrops with linked User and Raiditem
+app.get(`/itemdrops`, async (req, res) => {
+  try {
+    const itemdrops = await Itemdrop.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'discord', 'lodestoneid', 'lodestoneimage'], // Include relevant User fields
+        },
+        {
+          model: Raiditem,
+          attributes: ['id', 'name', 'isweapon', 'haslist', 'raidimage','floorid', 'order'], // Include relevant Raiditem fields
+        },
+      ],
+    });
+    res.status(200).json(itemdrops);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Initialize CRUD Routes for all models
 handleCRUD(User);
 handleCRUD(Raidfloor);
