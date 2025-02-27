@@ -88,6 +88,7 @@ const Raiditem = sequelize.define("Raiditem", {
   },
 });
 
+
 // Define the Alternate model
 const Alternate = sequelize.define("Alternate", {
   id: {
@@ -104,6 +105,19 @@ const Alternate = sequelize.define("Alternate", {
     allowNull: false,
   },
 });
+
+// Define the Jobs model
+const Jobs = sequelize.define("Jobs", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+})
 
 // Define the Itemdrops model with associations
 const Itemdrop = sequelize.define("Itemdrop", {
@@ -316,6 +330,7 @@ handleCRUD(Raiditem);
 handleCRUD(Itemdrop);
 handleCRUD(Alternate);
 handleCRUD(Waitinglist);
+handleCRUD(Jobs);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
