@@ -107,7 +107,7 @@ const Alternate = sequelize.define("Alternate", {
 });
 
 // Define the Jobs model
-const Jobs = sequelize.define("Jobs", {
+const Job = sequelize.define("Jobs", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -352,7 +352,7 @@ handleCRUD(Raiditem);
 handleCRUD(Itemdrop);
 handleCRUD(Alternate);
 handleCRUD(Waitinglist);
-handleCRUD(Jobs);
+handleCRUD(Job);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
