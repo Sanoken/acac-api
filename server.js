@@ -107,7 +107,7 @@ const Alternate = sequelize.define("Alternate", {
 });
 
 // Define the Jobs model
-const Job = sequelize.define("Jobs", {
+const Job = sequelize.define("Job", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
