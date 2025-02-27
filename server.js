@@ -117,6 +117,7 @@ const Jobs = sequelize.define("Jobs", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  jobimage: DataTypes.STRING,
 })
 
 // Define the Itemdrops model with associations
