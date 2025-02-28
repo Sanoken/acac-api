@@ -277,7 +277,6 @@ app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
 app.get("/waitinglists", async (req, res) => {
   try {
     const waitinglist = await Waitinglist.findAll({
-      where: { raiditemid: req.params.raiditemid },
       attributes: { exclude: ["userid", "raiditemid"] }, // Exclude here
       include: [
         {
