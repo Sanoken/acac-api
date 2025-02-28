@@ -156,7 +156,7 @@ Itemdrop.belongsTo(Raiditem, { foreignKey: "itemid" });
 Raidfloor.hasMany(Itemdrop, { foreignKey: "floorid" });
 Itemdrop.belongsTo(Raidfloor, { foreignKey: "floorid" });
 
-User.hasMany(Alternate, { foreignKey: "userid" });
+User.hasOne(Alternate, { foreignKey: "userid" });
 Alternate.belongsTo(User, { foreignKey: "userid" });
 
 User.hasMany(Waitinglist, { foreignKey: "userid" });
