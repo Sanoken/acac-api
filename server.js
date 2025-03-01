@@ -252,19 +252,19 @@ app.get("/waitinglists/raiditem/:raiditemid", async (req, res) => {
         },
         {
           model: Raiditem,
-          include: [
-            {
-              model: Itemdrop,
-              where: { itemid: req.params.raiditemid },
-              include: [
-                {
-                  model: Raidfloor,
-                  attributes: ["id", "name", "order"], // Adjust attributes as needed
-                },
-              ],
-              required: false, // Include even if no itemdrops exist
-            },
-          ],
+          // include: [
+          //   {
+          //     model: Itemdrop,
+          //     where: { itemid: req.params.raiditemid },
+          //     include: [
+          //       {
+          //         model: Raidfloor,
+          //         attributes: ["id", "name", "order"], // Adjust attributes as needed
+          //       },
+          //     ],
+          //     required: false, // Include even if no itemdrops exist
+          //   },
+          // ],
         },
       ],
     });
