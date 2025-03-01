@@ -284,18 +284,18 @@ app.get("/waitinglists", async (req, res) => {
         },
         {
           model: Raiditem,
-          include: [
-            {
-              model: Itemdrop,
-              include: [
-                {
-                  model: Raidfloor,
-                  attributes: ["id", "name", "order"], // Include relevant fields
-                },
-              ],
-              required: false, // Include even if no itemdrops exist
-            },
-          ],
+          // include: [
+          //   {
+          //     model: Itemdrop,
+          //     include: [
+          //       {
+          //         model: Raidfloor,
+          //         attributes: ["id", "name", "order"], // Include relevant fields
+          //       },
+          //     ],
+          //     required: false, // Include even if no itemdrops exist
+          //   },
+          // ],
         },
       ],
     });
